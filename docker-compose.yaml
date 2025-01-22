@@ -1,0 +1,51 @@
+services:
+  spring:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: vinland-store:latest
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env.dev
+    depends_on:
+      db:
+        condition: service_started
+    volumes:
+      - ./src:/app/src
+      - ./pom.xml:/app/pom.xml
+      - ~/.m2:/root/.m2
+    links:
+      - db
+    #    command: ./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+    networks:
+      - local
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048MB
+
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - local
+
+networks:
+  local:
+    driver: bridge
+
+volumes:
+  postgres_data:

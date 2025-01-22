@@ -1,0 +1,42 @@
+spring:
+  config:
+    import: optional:file:.env.dev[.properties]
+  main:
+    banner-mode: off
+
+  security:
+    user:
+      name: ${ACTUATOR_USERNAME}
+      password: ${ACTUATOR_PASSWORD}
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  sql:
+    init:
+      mode: never
+      continue-on-error: false
+
+logging:
+  level:
+    root: info
+    org.springframework.data.redis: debug
+    io.lettuce.core: debug
+
+app:
+  frontend:
+    url: https://indie-game-shop.netlify.app
+
+
+jwt:
+  key: ${JWT_KEY}
+  accessToken: 10080 # 7 day
+  refreshToken: 131490 # 3 month
