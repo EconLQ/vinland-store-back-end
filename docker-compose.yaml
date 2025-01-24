@@ -2,7 +2,7 @@ services:
   spring:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     image: vinland-store:latest
     ports:
       - "8080:8080"
