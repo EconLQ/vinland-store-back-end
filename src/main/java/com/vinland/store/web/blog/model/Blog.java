@@ -3,6 +3,7 @@ package com.vinland.store.web.blog.model;
 import com.vinland.store.web.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -33,7 +34,8 @@ public class Blog {
     @ElementCollection
     private Set<String> tags;
 
-    @Column(nullable = false)
+    @Column(name = "published")
+    @ColumnDefault("false")
     private Boolean published = false;
 
     @Column(name = "view_count")

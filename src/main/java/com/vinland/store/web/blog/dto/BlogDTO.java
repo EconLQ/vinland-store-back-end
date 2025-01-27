@@ -27,5 +27,6 @@ public class BlogDTO extends RepresentationModel<BlogDTO> implements Serializabl
     private Boolean published;
     private Long viewCount;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String author;
 }

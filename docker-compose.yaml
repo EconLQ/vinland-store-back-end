@@ -27,7 +27,7 @@ services:
           memory: 2048MB
 
   db:
-    image: postgres
+    image: postgres:17-alpine
     ports:
       - "5432:5432"
     env_file:
