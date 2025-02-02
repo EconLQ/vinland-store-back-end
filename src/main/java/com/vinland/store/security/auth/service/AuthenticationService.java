@@ -42,6 +42,7 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
+                .isEmailVerified(false)
                 .build());
     }
 
