@@ -27,7 +27,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User create(User user) {
-        if (Boolean.TRUE.equals(userDAO.findByEmail(user.getEmail()))) {
+        if (Boolean.TRUE.equals(userDAO.existsByEmail(user.getEmail()))) {
             throw new EmailAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
         return userDAO.save(user);

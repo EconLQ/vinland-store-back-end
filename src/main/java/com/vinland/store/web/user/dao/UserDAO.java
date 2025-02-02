@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserDAO extends JpaRepository<User, Long> {
+    Boolean existsByEmail(String email);
+
     @Query(value = "SELECT u FROM User u WHERE u.username = :username")
     Optional<User> findByUsername(String username);
 
