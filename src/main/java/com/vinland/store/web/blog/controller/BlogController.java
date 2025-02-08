@@ -14,6 +14,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public class BlogController {
     private final BlogMapperService blogMapperService;
-    //    private final BlogMapper blogMapper;
     private final BlogModelAssembler blogModelAssembler;
     private final BlogService blogService;
     private final PagedResourcesAssembler<BlogDTO> pagedResourcesAssembler;
@@ -47,21 +47,20 @@ public class BlogController {
     }
 
     @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE)
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BlogDTO> updateBlog(@PathVariable Long id, @Valid @RequestBody BlogDTO blogDTO, @AuthenticationPrincipal User user) {
-//        return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.updateBlog(blogDTO)));
         return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.updateBlog(id, blogDTO, null), null));
     }
 
     @DeleteMapping("/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteBlog(@PathVariable Long id) {
         blogService.deleteBlog(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BlogDTO> createBlog(@Valid @RequestBody BlogDTO blogDTO, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.createBlog(blogDTO, null), null));
     }

@@ -7,6 +7,7 @@ import com.vinland.store.web.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,13 +21,12 @@ import java.util.Set;
 public class GeneratorService {
     private final BlogDAO blogDAO;
     private final UserDAO userDAO;
-
+    private static final String ADMIN_USERNAME = "econ";
     public void generateBlogs(int amount) {
         List<Blog> blogs = new ArrayList<>();
         Faker faker = new Faker();
-//        User user = userDAO.getReferenceById(1L);
-        User user = userDAO.findByUsername("econ")
-                .orElseThrow(() -> new RuntimeException("User with such username does not exist"));
+        final User user = userDAO.findByUsername(ADMIN_USERNAME)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such username does not exist"));
         long start = System.currentTimeMillis();
         for (int i = 0; i < amount; i++) {
             var blog = new Blog();
@@ -41,8 +41,6 @@ public class GeneratorService {
             blog.setAuthor(user);
             blogs.add(blog);
         }
-//        user.setBlogs(blogs);
-//        userDAO.save(user);
         blogDAO.saveAll(blogs);
         blogs.clear();
         long end = System.currentTimeMillis();
