@@ -22,8 +22,14 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return loadUserByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));
+        String emailPattern = "^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+$";
+        if (!username.matches(emailPattern)) {
+            return userDAO.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User with username " + username + " not found"));
+        } else {
+            return loadUserByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));
+        }
     }
 
     public User create(User user) {
