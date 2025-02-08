@@ -2,9 +2,11 @@ package com.vinland.store.config;
 
 import com.vinland.store.security.JwtAuthenticationFilter;
 import com.vinland.store.security.auth.AuthProvider;
+import com.vinland.store.utils.PathConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -29,7 +31,9 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
-                        authorize -> authorize.anyRequest().permitAll()
+                        authorize -> authorize
+                                .requestMatchers(HttpMethod.GET, PathConstants.BLOG + "/**").authenticated()
+                                .anyRequest().permitAll()
                 )
                 //.oauth2Login(auth -> auth.successHandler(oAuth2SuccessHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
