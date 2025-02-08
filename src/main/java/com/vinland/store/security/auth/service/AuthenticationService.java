@@ -3,6 +3,7 @@ package com.vinland.store.security.auth.service;
 import com.vinland.store.security.auth.model.LoginResponse;
 import com.vinland.store.security.auth.model.RegistrationRequest;
 import com.vinland.store.utils.exception.JwtTokenException;
+import com.vinland.store.web.user.model.Role;
 import com.vinland.store.web.user.model.User;
 import com.vinland.store.web.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .isEmailVerified(false)
+                .roles(Set.of(Role.USER))
                 .build());
     }
 
