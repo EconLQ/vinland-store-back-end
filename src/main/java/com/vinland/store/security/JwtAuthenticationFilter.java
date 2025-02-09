@@ -8,6 +8,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -24,13 +25,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private static final String BEARER_PREFIX = "Bearer ";
-    private static final String HEADER_NAME = "Authorization";
     private final JwtService jwtService;
     private final UserService userService;
 
@@ -40,45 +41,45 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader(HEADER_NAME);
-        if (authHeader == null || authHeader.isEmpty()) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Optional<Cookie> accessTokenCookie = Arrays.stream(cookies)
+                    .filter(cookie -> "accessToken".equals(cookie.getName()))
+                    .findFirst();
+            if (accessTokenCookie.isPresent()) {
+                log.debug("Found access token cookie: {}", accessTokenCookie.get().getValue());
+                String token = accessTokenCookie.get().getValue();
+                try {
+                    final String email = jwtService.extractEmail(token);
+                    log.info("Extracted email from cookie: {}", email);
 
-        if (!authHeader.startsWith(BEARER_PREFIX)) {
-            MessageResponse error = new MessageResponse("Missing 'Bearer' type in 'Authorization' header. Expected 'Authorization: Bearer <JWT>'");
-            sendErrorResponse(response, error, HttpStatus.FORBIDDEN);
-            log.warn(error.getMessage());
-            return;
-        }
-
-        final String jwt = authHeader.substring(BEARER_PREFIX.length());
-        try {
-            final String email = jwtService.extractEmail(jwt);
-            if (!email.isBlank() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userService.loadUserByUsername(email);
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    SecurityContext context = SecurityContextHolder.createEmptyContext();
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            userDetails.getPassword(),
-                            userDetails.getAuthorities()
-                    );
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    context.setAuthentication(authenticationToken);
-                    SecurityContextHolder.setContext(context);
+                    if (!email.isBlank() && SecurityContextHolder.getContext().getAuthentication() == null) {
+                        UserDetails userDetails = userService.loadUserByUsername(email);
+                        if (jwtService.isTokenValid(token, userDetails)) {
+                            SecurityContext context = SecurityContextHolder.createEmptyContext();
+                            UsernamePasswordAuthenticationToken authenticationToken =
+                                    new UsernamePasswordAuthenticationToken(
+                                            userDetails,
+                                            userDetails.getPassword(),
+                                            userDetails.getAuthorities()
+                                    );
+                            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            context.setAuthentication(authenticationToken);
+                            SecurityContextHolder.setContext(context);
+                        }
+                    }
+                    filterChain.doFilter(request, response);
+                } catch (ExpiredJwtException e) {
+                    sendErrorResponse(response, new MessageResponse("Token has expired"), HttpStatus.UNAUTHORIZED);
+                    log.warn(e.toString());
+                } catch (JwtException e) {
+                    sendErrorResponse(response, new MessageResponse("Invalid JWT token"), HttpStatus.FORBIDDEN);
+                    log.warn(e.toString());
                 }
             }
-            filterChain.doFilter(request, response);
-        } catch (ExpiredJwtException e) {
-            sendErrorResponse(response, new MessageResponse("Token has expired"), HttpStatus.UNAUTHORIZED);
-            log.warn(e.toString());
-        } catch (JwtException e) {
-            sendErrorResponse(response, new MessageResponse("Invalid JWT token"), HttpStatus.FORBIDDEN);
-            log.warn(e.toString());
         }
     }
+
 
     private void sendErrorResponse(@NonNull HttpServletResponse response, MessageResponse message, HttpStatus status) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
