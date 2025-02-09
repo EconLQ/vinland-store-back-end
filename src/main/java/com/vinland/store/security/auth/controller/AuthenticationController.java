@@ -28,7 +28,7 @@ public class AuthenticationController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(response);
     }
