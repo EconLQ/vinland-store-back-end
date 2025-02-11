@@ -33,9 +33,13 @@ public class UserService implements UserDetailsService {
     }
 
     public User create(User user) {
-        if (Boolean.TRUE.equals(userDAO.existsByEmail(user.getEmail()))) {
+        if (Boolean.TRUE.equals(existsByEmail(user.getEmail()))) {
             throw new EmailAlreadyExistsException("User with email " + user.getEmail() + " already exists");
         }
         return userDAO.save(user);
+    }
+
+    public Boolean existsByEmail(String email) {
+        return userDAO.existsByEmail(email);
     }
 }

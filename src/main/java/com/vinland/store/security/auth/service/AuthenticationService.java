@@ -3,6 +3,7 @@ package com.vinland.store.security.auth.service;
 import com.vinland.store.security.auth.model.LoginResponse;
 import com.vinland.store.security.auth.model.RegistrationRequest;
 import com.vinland.store.utils.exception.JwtTokenException;
+import com.vinland.store.utils.exception.UserAlreadyExistException;
 import com.vinland.store.web.user.model.Role;
 import com.vinland.store.web.user.model.User;
 import com.vinland.store.web.user.service.UserService;
@@ -37,7 +38,10 @@ public class AuthenticationService {
         return new LoginResponse(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
     }
 
-    public User signUp(RegistrationRequest request) {
+    public User signUp(RegistrationRequest request) throws UserAlreadyExistException {
+        if (Boolean.TRUE.equals(userService.existsByEmail(request.getEmail()))) {
+            throw new UserAlreadyExistException("User with email " + request.getEmail() + " already exists");
+        }
         return userService.create(User.builder()
                 .username(request.getUsername())
                 .firstName(request.getFirstName())
