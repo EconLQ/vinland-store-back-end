@@ -10,5 +10,5 @@ public class PathConstants {
     public static final String GENERATOR = API_VERSION + "/generate";
     public static final String FRONT_END_DEV = "http://localhost:4200";
     public static final String FRONT_END_PROD = "https://vinland-store.netlify.app/";
-
+    public static final String ACCOUNT = API_VERSION + "/account";
 }
