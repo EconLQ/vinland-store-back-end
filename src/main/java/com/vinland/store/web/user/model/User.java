@@ -45,7 +45,7 @@ public class User implements UserDetails {
     @JsonIgnore
     @ColumnDefault("false")
     @Column(name = "email_verified", nullable = false)
-    private Boolean isEmailVerified = false;
+    private Boolean isEmailVerified;
 
     @Column(name = "password_reset_code", unique = true)
     @Size(max = 64)
