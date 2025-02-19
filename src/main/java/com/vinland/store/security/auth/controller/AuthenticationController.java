@@ -60,9 +60,15 @@ public class AuthenticationController {
     }
 
     @PostMapping(value = "/refresh")
-    public ResponseEntity<LoginResponse> refreshToken(@RequestHeader(value = "Authorization") String authorizationHeader) {
-        String refreshToken = authorizationHeader.substring("Bearer ".length());
-        LoginResponse response = authenticationService.refreshToken(refreshToken);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<MessageResponse> refreshToken(@RequestHeader(value = "Cookie") String cookieHeader) {
+        final String cleanedAccessToken = cookieHeader.substring("accessToken=".length());
+        final LoginResponse loginResponse = authenticationService.refreshToken(cleanedAccessToken);
+        ResponseCookie cookie = ResponseCookie.from("accessToken", loginResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .build();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(new MessageResponse("Refreshed token successfully"));
     }
 }
