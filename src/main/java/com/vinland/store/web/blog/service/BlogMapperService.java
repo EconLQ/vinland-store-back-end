@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BlogMapperService {
-    public BlogDTO blogToBlogDTO(Blog blog, User user) {
+    public BlogDTO blogToBlogDTO(Blog blog) {
         BlogDTO blogDTO = new BlogDTO();
         blogDTO.setId(blog.getId());
         blogDTO.setTitle(blog.getTitle());
@@ -19,7 +19,7 @@ public class BlogMapperService {
         blogDTO.setViewCount(blog.getViewCount());
         blogDTO.setCreatedAt(blog.getCreatedAt());
         blogDTO.setUpdatedAt(blog.getUpdatedAt());
-        blogDTO.setAuthor(user == null ? null : user.getUsername());
+        blogDTO.setAuthor(blog.getAuthor().getUsername());
         return blogDTO;
     }
 

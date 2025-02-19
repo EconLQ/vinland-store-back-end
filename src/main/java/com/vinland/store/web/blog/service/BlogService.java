@@ -18,7 +18,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class BlogService {
-    //    private final BlogMapper blogMapper;
     private final BlogMapperService blogMapperService;
     private final BlogDAO blogDAO;
 
@@ -28,7 +27,7 @@ public class BlogService {
 
     public Page<BlogDTO> getBlogs(Pageable pageable) {
         return blogDAO.findAll(pageable)
-                .map(blog -> blogMapperService.blogToBlogDTO(blog, null));
+                .map(blogMapperService::blogToBlogDTO);
     }
 
     @Transactional
