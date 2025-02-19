@@ -16,10 +16,10 @@ public class BlogModelAssembler extends RepresentationModelAssemblerSupport<Blog
 
     @Override
     public BlogDTO toModel(BlogDTO entity) {
-        return entity.add(linkTo(methodOn(BlogController.class).getBlogById(entity.getId(), null)).withSelfRel());
+        return entity.add(linkTo(methodOn(BlogController.class).getBlogById(entity.getId())).withSelfRel());
     }
 
     public EntityModel<BlogDTO> toEntityModel(BlogDTO entity) {
-        return EntityModel.of(entity, linkTo(methodOn(BlogController.class).getBlogById(entity.getId(), null)).withRel("blogs"));
+        return EntityModel.of(entity, linkTo(methodOn(BlogController.class).getBlogById(entity.getId())).withRel("blogs"));
     }
 }
