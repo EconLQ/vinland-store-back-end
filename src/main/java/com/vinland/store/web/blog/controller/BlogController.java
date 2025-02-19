@@ -30,17 +30,17 @@ public class BlogController {
     private final BlogService blogService;
     private final PagedResourcesAssembler<BlogDTO> pagedResourcesAssembler;
 
-    @GetMapping()
+    @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<PagedModel<BlogDTO>> getBlogs(Pageable pageable) {
         final Page<BlogDTO> blogs = blogService.getBlogs(pageable).map(blogModelAssembler::toModel);
         PagedModel<BlogDTO> pagedModel = pagedResourcesAssembler.toModel(blogs, blogModelAssembler);
         return ResponseEntity.ok(pagedModel);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<BlogDTO>> getBlogById(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<EntityModel<BlogDTO>> getBlogById(@PathVariable Long id) {
         return blogService.getBlogById(id)
-                .map(blog -> blogMapperService.blogToBlogDTO(blog, null))
+                .map(blogMapperService::blogToBlogDTO)
                 .map(blogModelAssembler::toEntityModel)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -49,7 +49,7 @@ public class BlogController {
     @PutMapping(path = "/{id}", consumes = APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BlogDTO> updateBlog(@PathVariable Long id, @Valid @RequestBody BlogDTO blogDTO, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.updateBlog(id, blogDTO, null), null));
+        return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.updateBlog(id, blogDTO, user)));
     }
 
     @DeleteMapping("/{id}")
@@ -62,6 +62,6 @@ public class BlogController {
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<BlogDTO> createBlog(@Valid @RequestBody BlogDTO blogDTO, @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.createBlog(blogDTO, null), null));
+        return ResponseEntity.ok(blogMapperService.blogToBlogDTO(blogService.createBlog(blogDTO, user)));
     }
 }
