@@ -36,10 +36,11 @@ public class Blog {
 
     @Column(name = "published")
     @ColumnDefault("false")
-    private Boolean published = false;
+    private Boolean published;
 
     @Column(name = "view_count")
-    private Long viewCount = 0L;
+    @ColumnDefault("0")
+    private Long viewCount;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
