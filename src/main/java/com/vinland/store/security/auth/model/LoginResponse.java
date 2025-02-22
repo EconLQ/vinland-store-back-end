@@ -13,7 +13,4 @@ public class LoginResponse {
     @JsonProperty(value = "access_token", required = true)
     private String accessToken;
 
-    @JsonProperty(value = "refresh_token", required = true)
-    private String refreshToken;
-
 }
