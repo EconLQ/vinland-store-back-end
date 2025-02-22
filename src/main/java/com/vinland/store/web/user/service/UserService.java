@@ -3,6 +3,7 @@ package com.vinland.store.web.user.service;
 import com.vinland.store.utils.exception.EmailAlreadyExistsException;
 import com.vinland.store.web.user.dao.UserDAO;
 import com.vinland.store.web.user.model.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,6 +33,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @Transactional
     public User create(User user) {
         if (Boolean.TRUE.equals(existsByEmail(user.getEmail()))) {
             throw new EmailAlreadyExistsException("User with email " + user.getEmail() + " already exists");
