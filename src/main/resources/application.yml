@@ -38,5 +38,5 @@ app:
 
 jwt:
   key: ${JWT_KEY}
-  accessToken: 10080 # 7 day
-  refreshToken: 131490 # 3 month
+  accessToken: ${ACCESS_TOKEN_EXPIRATION_SECONDS}
+  refreshToken: ${REFRESH_TOKEN_EXPIRATION_SECONDS}
