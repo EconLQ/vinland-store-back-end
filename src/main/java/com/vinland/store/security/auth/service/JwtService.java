@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -24,34 +25,54 @@ public class JwtService {
     @Value("${jwt.key}")
     private String accessTokenSecret;
     @Value("${jwt.accessToken}")
-    private Long accessTokenExpirationMinutes;
+    private Integer accessTokenExpirationSeconds;
     @Value("${jwt.refreshToken}")
-    private Long refreshTokenExpirationMinutes;
+    private Integer refreshTokenExpirationSeconds;
 
     // generate access token
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, "access", accessTokenExpirationMinutes);
+        return generateToken(userDetails, "access", accessTokenExpirationSeconds);
     }
 
     // generate refresh token
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, "refresh", refreshTokenExpirationMinutes);
+        return generateToken(userDetails, "refresh", refreshTokenExpirationSeconds);
     }
 
-    private String generateToken(UserDetails userDetails, String tokenType, Long expirationMinutes) {
+    private String generateToken(UserDetails userDetails, String tokenType, Integer expirationSeconds) {
         Map<String, Object> claims = new HashMap<>();
-        if (userDetails instanceof User customUserDetails) {
+        if (userDetails instanceof User) {
             claims.put("type", tokenType);
         }
-        return BEARER_PREFIX + buildToken(claims, userDetails, expirationMinutes);
+        return BEARER_PREFIX + buildToken(claims, userDetails, expirationSeconds);
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, Long expirationMinutes) {
+    public Cookie createCookieWithJwt(String token, String tokenName) {
+        Cookie cookie = new Cookie(tokenName, token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
+        cookie.setMaxAge(refreshTokenExpirationSeconds);
+        cookie.setPath("/");
+        return cookie;
+    }
+
+    public Cookie removeCookieWithJwt(String tokenName) {
+        Cookie refreshCookie = new Cookie(tokenName, null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setSecure(true);
+        refreshCookie.setAttribute("SameSite", "None");
+        refreshCookie.setMaxAge(0);
+        refreshCookie.setPath("/");
+        return refreshCookie;
+    }
+
+    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, Integer expirationSeconds) {
         return Jwts.builder()
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))
-                .expiration(Date.from(Instant.now().plus(expirationMinutes, ChronoUnit.MINUTES)))
+                .expiration(Date.from(Instant.now().plus(expirationSeconds, ChronoUnit.SECONDS)))
                 .id(UUID.randomUUID().toString())
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .header().type("JWT")
