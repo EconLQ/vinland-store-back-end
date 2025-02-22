@@ -28,14 +28,13 @@ public class AuthenticationService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public LoginResponse signIn(String email, String password) {
+    public Map<String, String> signIn(String email, String password) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 email,
                 password
         ));
         User user = (User) userService.loadUserByUsername(email);
-        Map<String, String> tokens = generateTokens(user);
-        return new LoginResponse(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
+        return generateCleanTokens(user);
     }
 
     public User signUp(RegistrationRequest request) throws UserAlreadyExistException {
@@ -53,9 +52,9 @@ public class AuthenticationService {
                 .build());
     }
 
-    private Map<String, String> generateTokens(User user) {
-        final String accessToken = jwtService.generateAccessToken(user);
-        final String refreshToken = jwtService.generateRefreshToken(user);
+    private Map<String, String> generateCleanTokens(User user) {
+        final String accessToken = jwtService.generateAccessToken(user).substring("Bearer ".length());
+        final String refreshToken = jwtService.generateRefreshToken(user).substring("Bearer ".length());
         return Map.of(
                 ACCESS_TOKEN, accessToken,
                 REFRESH_TOKEN, refreshToken
@@ -69,7 +68,7 @@ public class AuthenticationService {
 
         String email = jwtService.extractEmail(refreshToken);
         User user = (User) userService.loadUserByUsername(email);
-        Map<String, String> tokens = generateTokens(user);
-        return new LoginResponse(tokens.get(ACCESS_TOKEN), tokens.get(REFRESH_TOKEN));
+        Map<String, String> tokens = generateCleanTokens(user);
+        return new LoginResponse(tokens.get(ACCESS_TOKEN));
     }
 }
